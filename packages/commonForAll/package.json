@@ -1,0 +1,23 @@
+{
+  "name": "@repo/commonforall",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": {
+    "./zodtypes": "./types/zod.ts"
+  },
+  "scripts": {
+    "dev": "tsc && node ./dist/index.js"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/jsonwebtoken": "^9.0.8",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.24.1"
+  }
+}
