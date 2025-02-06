@@ -4,6 +4,7 @@
 node_modules
 .pnp
 .pnp.js
+packages/backendCommon
 
 # Local env files
 .env
