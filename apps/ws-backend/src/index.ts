@@ -60,8 +60,6 @@ wss.on("connection", function connction(ws, request) {
   ws.on("message", async function (data) {
     const parsedData = JSON.parse(data as unknown as string);
 
-    console.log("Parsed Data", parsedData);
-    console.log("Users : ", users);
     if (parsedData.type === "join_room") {
       const user = users.find((x) => x.ws === ws);
       user?.rooms.push(parsedData.roomId);
