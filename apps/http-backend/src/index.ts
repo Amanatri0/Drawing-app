@@ -6,6 +6,6 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/v1/user", userRouter);
-app.use("/api/v1/user", roomRouter);
+app.use("/api/v1/room", roomRouter);
 
 app.listen(3001);

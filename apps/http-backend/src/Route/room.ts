@@ -5,7 +5,7 @@ import { UserMiddleware } from "../Middleware/userMiddleware";
 
 export const roomRouter: Router = Router();
 
-roomRouter.post("/room", UserMiddleware, async (req, res) => {
+roomRouter.post("/", UserMiddleware, async (req, res) => {
   const userId = req.userId;
   const parsedData = RoomSchema.safeParse(req.body);
 
@@ -22,7 +22,7 @@ roomRouter.post("/room", UserMiddleware, async (req, res) => {
     return;
   }
   try {
-    const response = await prismaClient.room.create({
+    const user = await prismaClient.room.create({
       data: {
         slug: parsedData.data.slug,
         userId: userId,
@@ -30,11 +30,59 @@ roomRouter.post("/room", UserMiddleware, async (req, res) => {
     });
 
     res.json({
-      message: `Room has been created with the roomname as "${response.slug}" by the user "${response.userId}" and the Room id is "${response.id}"`,
+      message: `Room has been created with the roomname as "${user.slug}" by the user "${user.userId}" and the Room id is "${user.id}"`,
     });
   } catch (error) {
     res.status(404).send({
       message: "Something went wrong while creating room ",
+      error: (error as Error).message,
+    });
+  }
+});
+
+roomRouter.get("/chat/:roomId", UserMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const roomId = Number(req.params.roomId);
+
+  try {
+    const chats = await prismaClient.chat.findMany({
+      where: {
+        roomId: roomId,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      take: 10,
+    });
+
+    res.json({
+      message: chats,
+    });
+  } catch (error) {
+    res.status(404).send({
+      message: "Something went wrong while retriving chats ",
+      error: (error as Error).message,
+    });
+  }
+});
+
+roomRouter.get("/room/:slug", UserMiddleware, async (req, res) => {
+  const userId = req.userId;
+  const slug = req.params.slug;
+
+  try {
+    const room = await prismaClient.room.findFirst({
+      where: {
+        slug,
+      },
+    });
+
+    res.json({
+      message: room,
+    });
+  } catch (error) {
+    res.status(404).send({
+      message: "Something went wrong while retriving slug ",
       error: (error as Error).message,
     });
   }
