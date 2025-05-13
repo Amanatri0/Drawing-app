@@ -1,3 +1,6 @@
+import { HTTP_BACKEND } from "@/config";
+import axios from "axios";
+
 type Shape =
   | {
       type: "rect";
@@ -19,17 +22,19 @@ type Shape =
       length: number;
     };
 
-export function inItDraw(canvas: HTMLCanvasElement) {
+export async function inItDraw(canvas: HTMLCanvasElement, roomId: string) {
   const ctx = canvas.getContext("2d");
 
-  let existingShape: Shape[] = [];
+  const existingShape: Shape[] = await getExistingShapes(roomId);
 
   if (!ctx) {
     return;
   }
 
-  ctx.fillStyle = "rgba(0, 0, 0)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // ctx.fillStyle = "rgba(0, 0, 0)";
+  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  clearCanvas(existingShape, canvas, ctx);
 
   let onClicked = false;
   let startX = 0;
@@ -59,12 +64,38 @@ export function inItDraw(canvas: HTMLCanvasElement) {
     if (onClicked) {
       const width = e.clientX - startX;
       const height = e.clientY - startY;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "rgba(0, 0, 0)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      clearCanvas(existingShape, canvas, ctx);
       ctx.strokeStyle = "rgba(255, 255, 255)";
       ctx.strokeRect(startX, startY, width, height);
     }
   });
+}
+
+function clearCanvas(
+  existingShape: Shape[],
+  canvas: HTMLCanvasElement,
+  ctx: CanvasRenderingContext2D
+) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = " rgba(0, 0, 0)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  existingShape.map((shape) => {
+    if (shape.type === "rect") {
+      ctx.strokeStyle = "rgba(255, 255, 255)";
+      ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+    }
+  });
+}
+
+async function getExistingShapes(roomId: string) {
+  const res = await axios.get(`${HTTP_BACKEND}/chat/${roomId}`);
+  const messages = res.data.message;
+
+  const shapes = messages.map((x: { message: string }) => {
+    const messageData = JSON.parse(x.message);
+    return messageData;
+  });
+
+  return shapes;
 }
