@@ -1,13 +1,8 @@
-"use client";
-
 import { inItDraw } from "@/app/draw";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export function Canvas({ roomId }: { roomId: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const [socket, setSocket] = useState(null);
-
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     if (canvasRef.current) {
       inItDraw(canvasRef.current, roomId);

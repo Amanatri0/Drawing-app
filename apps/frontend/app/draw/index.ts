@@ -22,7 +22,11 @@ type Shape =
       length: number;
     };
 
-export async function inItDraw(canvas: HTMLCanvasElement, roomId: string) {
+export async function inItDraw(
+  canvas: HTMLCanvasElement,
+  roomId: string,
+  socket: WebSocket
+) {
   const ctx = canvas.getContext("2d");
 
   const existingShape: Shape[] = await getExistingShapes(roomId);
@@ -30,6 +34,16 @@ export async function inItDraw(canvas: HTMLCanvasElement, roomId: string) {
   if (!ctx) {
     return;
   }
+
+  socket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+
+    if (message.type == "chat") {
+      const parsedShaped = JSON.parse(message.message);
+      existingShape.push(parsedShaped);
+      clearCanvas(existingShape, canvas, ctx);
+    }
+  };
 
   // ctx.fillStyle = "rgba(0, 0, 0)";
   // ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -51,13 +65,24 @@ export async function inItDraw(canvas: HTMLCanvasElement, roomId: string) {
     const width = e.clientX - startX;
     const height = e.clientY - startY;
 
-    existingShape.push({
+    const shape: Shape = {
       type: "rect",
       x: startX,
       y: startY,
       width,
       height,
-    });
+    };
+
+    existingShape.push(shape);
+
+    socket.send(
+      JSON.stringify({
+        type: "chat",
+        message: JSON.stringify({
+          shape,
+        }),
+      })
+    );
   });
 
   canvas.addEventListener("mousemove", (e) => {
