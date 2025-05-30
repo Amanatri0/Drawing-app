@@ -1,28 +1,27 @@
 import { HTTP_BACKEND } from "@/config";
 import axios from "axios";
 
-type Shape =
-  | {
-      type: "rect";
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    }
-  | {
-      type: "circle";
-      centerX: number;
-      centerY: number;
-      radius: number;
-    }
-  | {
-      type: "square";
-      x: number;
-      y: number;
-      length: number;
-    };
+type Shape = {
+  type: "rect";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+// | {
+//     type: "circle";
+//     centerX: number;
+//     centerY: number;
+//     radius: number;
+//   }
+// | {
+//     type: "square";
+//     x: number;
+//     y: number;
+//     length: number;
+//   };
 
-export async function inItDraw(
+export async function initDraw(
   canvas: HTMLCanvasElement,
   roomId: string,
   socket: WebSocket
@@ -30,6 +29,8 @@ export async function inItDraw(
   const ctx = canvas.getContext("2d");
 
   const existingShape: Shape[] = await getExistingShapes(roomId);
+
+  console.log(existingShape);
 
   if (!ctx) {
     return;
@@ -40,7 +41,7 @@ export async function inItDraw(
 
     if (message.type == "chat") {
       const parsedShaped = JSON.parse(message.message);
-      existingShape.push(parsedShaped);
+      existingShape.push(parsedShaped.shape);
       clearCanvas(existingShape, canvas, ctx);
     }
   };
@@ -73,6 +74,10 @@ export async function inItDraw(
       height,
     };
 
+    if (!shape) {
+      return;
+    }
+
     existingShape.push(shape);
 
     socket.send(
@@ -81,6 +86,7 @@ export async function inItDraw(
         message: JSON.stringify({
           shape,
         }),
+        roomId,
       })
     );
   });
@@ -114,12 +120,17 @@ function clearCanvas(
 }
 
 async function getExistingShapes(roomId: string) {
-  const res = await axios.get(`${HTTP_BACKEND}/chat/${roomId}`);
+  const res = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
   const messages = res.data.message;
+
+  // if (!Array.isArray(messages)) {
+  //   console.warn("No messages found or invalid format:", messages);
+  //   return [];
+  // }
 
   const shapes = messages.map((x: { message: string }) => {
     const messageData = JSON.parse(x.message);
-    return messageData;
+    return messageData.shape;
   });
 
   return shapes;

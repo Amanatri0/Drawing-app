@@ -1,21 +1,23 @@
-import { inItDraw } from "@/app/draw";
+import { initDraw } from "@/app/draw";
 import { useEffect, useRef } from "react";
 
-export function Canvas({ roomId }: { roomId: string }) {
+export function Canvas({
+  roomId,
+  socket,
+}: {
+  roomId: string;
+  socket: WebSocket;
+}) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     if (canvasRef.current) {
-      inItDraw(canvasRef.current, roomId);
+      initDraw(canvasRef.current, roomId, socket);
     }
   }, [canvasRef]);
 
   return (
-    <div className="flex overflow-hidden">
+    <div className="flex overflow-hidden bg-black">
       <canvas ref={canvasRef} width={1550} height={695}></canvas>
-      <div className="absolute space-x-2">
-        <button className="bg-red-400 p-4 rounded-3xl">Rect</button>
-        <button className="bg-yellow-400 p-4 rounded-3xl">Circle</button>
-      </div>
     </div>
   );
 }
