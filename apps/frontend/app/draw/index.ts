@@ -1,25 +1,26 @@
 import { HTTP_BACKEND } from "@/config";
 import axios from "axios";
 
-type Shape = {
-  type: "rect";
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
-// | {
-//     type: "circle";
-//     centerX: number;
-//     centerY: number;
-//     radius: number;
-//   }
-// | {
-//     type: "square";
-//     x: number;
-//     y: number;
-//     length: number;
-//   };
+type Shape =
+  | {
+      type: "rect";
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }
+  | {
+      type: "circle";
+      centerX: number;
+      centerY: number;
+      radius: number;
+    }
+  | {
+      type: "square";
+      x: number;
+      y: number;
+      length: number;
+    };
 
 export async function initDraw(
   canvas: HTMLCanvasElement,
@@ -45,9 +46,6 @@ export async function initDraw(
       clearCanvas(existingShape, canvas, ctx);
     }
   };
-
-  // ctx.fillStyle = "rgba(0, 0, 0)";
-  // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   clearCanvas(existingShape, canvas, ctx);
 
@@ -122,11 +120,6 @@ function clearCanvas(
 async function getExistingShapes(roomId: string) {
   const res = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
   const messages = res.data.message;
-
-  // if (!Array.isArray(messages)) {
-  //   console.warn("No messages found or invalid format:", messages);
-  //   return [];
-  // }
 
   const shapes = messages.map((x: { message: string }) => {
     const messageData = JSON.parse(x.message);
