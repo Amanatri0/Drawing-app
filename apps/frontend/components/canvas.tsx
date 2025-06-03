@@ -2,8 +2,9 @@ import { initDraw } from "@/app/draw";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "./Icons";
 import { Circle, PencilIcon, RectangleHorizontalIcon } from "lucide-react";
+import { Game } from "@/app/draw/game";
 
-type Shape = "pencil" | "circle" | "rect";
+export type Tool = "pencil" | "circle" | "rect";
 
 export function Canvas({
   roomId,
@@ -12,12 +13,22 @@ export function Canvas({
   roomId: string;
   socket: WebSocket;
 }) {
-  const [selectTool, setSelectedTool] = useState<Shape>("pencil");
-
+  const [selectedTool, setSelectedTool] = useState<Tool>("pencil");
+  const [game, setGame] = useState<Game>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    game?.setTool(selectedTool);
+  }, [selectedTool, game]);
+
   useEffect(() => {
     if (canvasRef.current) {
-      initDraw(canvasRef.current, roomId, socket);
+      const g = new Game(canvasRef.current, roomId, socket);
+      setGame(g);
+
+      return () => {
+        g.destroy();
+      };
     }
   }, [canvasRef]);
 
@@ -28,38 +39,38 @@ export function Canvas({
         width={window.innerWidth}
         height={window.innerHeight}
       ></canvas>
-      <div className=" fixed text-black top-10 left-[40%] border-amber-50 border-2 rounded-2xl px-30 py-5 bg-amber-50">
-        <Topbar setSelectedTool={setSelectedTool} selectTool={selectTool} />
+      <div className=" fixed text-black top-5 left-[40%] border-amber-50 border-2 rounded-2xl px-20 py-3 bg-amber-50">
+        <Topbar setSelectedTool={setSelectedTool} selectedTool={selectedTool} />
       </div>
     </div>
   );
 }
 
 function Topbar({
-  selectTool,
+  selectedTool,
   setSelectedTool,
 }: {
-  selectTool: Shape;
-  setSelectedTool: (s: Shape) => void;
+  selectedTool: Tool;
+  setSelectedTool: (s: Tool) => void;
 }) {
   return (
-    <div className="flex gap-2 cursor-pointer">
+    <div className="flex gap-4 cursor-pointer">
       <Icons
-        activated={selectTool === "pencil"}
+        activated={selectedTool === "pencil"}
         onclick={() => {
           setSelectedTool("pencil");
         }}
         icon={<PencilIcon />}
       ></Icons>
       <Icons
-        activated={selectTool === "circle"}
+        activated={selectedTool === "circle"}
         onclick={() => {
           setSelectedTool("circle");
         }}
         icon={<Circle />}
       ></Icons>
       <Icons
-        activated={selectTool === "rect"}
+        activated={selectedTool === "rect"}
         onclick={() => {
           setSelectedTool("rect");
         }}
