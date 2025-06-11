@@ -40,49 +40,82 @@
 //   }
 // });
 
-// roomRouter.get("/chat/:roomId", UserMiddleware, async (req, res) => {
-// const roomId = Number(req.params.roomId);
+// roomRouter.get("/chats/:roomId", UserMiddleware, async (req, res) => {
+//   const roomId = Number(req.params.roomId);
 
-// try {
-//   const chats = await prismaClient.chat.findMany({
-//     where: {
-//       roomId: roomId,
-//     },
-//     orderBy: {
-//       id: "desc",
-//     },
-//     take: 10,
-//   });
+//   try {
+//     const chats = await prismaClient.chat.findMany({
+//       where: {
+//         roomId: roomId,
+//       },
+//       orderBy: {
+//         id: "desc",
+//       },
+//       take: 10,
+//     });
 
-//   res.json({
-//     message: chats,
-//   });
-// } catch (error) {
-//   res.status(404).send({
-//     message: "Something went wrong while retriving chats ",
-//     error: (error as Error).message,
-//   });
-// }
+//     res.json({
+//       message: chats,
+//     });
+//   } catch (error) {
+//     res.status(404).send({
+//       message: "Something went wrong while retriving chats ",
+//       error: (error as Error).message,
+//     });
+//   }
 // });
 
 // roomRouter.get("/room/:slug", UserMiddleware, async (req, res) => {
-// const userId = req.userId;
-// const slug = req.params.slug;
+//   const userId = req.userId;
+//   const slug = req.params.slug;
 
-// try {
-//   const room = await prismaClient.room.findFirst({
-//     where: {
-//       slug,
-//     },
-//   });
+//   try {
+//     const room = await prismaClient.room.findFirst({
+//       where: {
+//         slug,
+//       },
+//     });
 
-//   res.json({
-//     message: room,
-//   });
-// } catch (error) {
-//   res.status(404).send({
-//     message: "Something went wrong while retriving slug ",
-//     error: (error as Error).message,
-//   });
-// }
+//     res.json({
+//       message: room,
+//     });
+//   } catch (error) {
+//     res.status(404).send({
+//       message: "Something went wrong while retriving slug ",
+//       error: (error as Error).message,
+//     });
+//   }
+// });
+
+// roomRouter.delete("/chats/:roomId", UserMiddleware, async (req, res) => {
+//   const roomId = Number(req.params.roomId);
+//   try {
+//     const latestMessage = await prismaClient.chat.findFirst({
+//       where: {
+//         roomId: roomId,
+//       },
+//       orderBy: {
+//         id: "desc",
+//       },
+//     });
+//     console.log(latestMessage);
+
+//     if (latestMessage) {
+//       await prismaClient.chat.delete({
+//         where: {
+//           roomId: roomId,
+//           id: latestMessage.id,
+//         },
+//       });
+
+//       res.json({
+//         message: `Your Shape has been deleted ${latestMessage.id}`,
+//       });
+//     }
+//   } catch (error) {
+//     res.status(404).send({
+//       message: "Something went wrong while Deleting chats ",
+//       error: (error as Error).message,
+//     });
+//   }
 // });

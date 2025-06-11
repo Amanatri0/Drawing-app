@@ -22,11 +22,14 @@ type Shape =
       length: number;
     }
   | {
-      type: "pencil";
+      type: "line";
       startX: number;
       startY: number;
       endX: number;
       endY: number;
+    }
+  | {
+      type: "delete";
     };
 
 export class Game {
@@ -63,7 +66,7 @@ export class Game {
     this.canvas.removeEventListener("mousemove", this.mouseMoveHandler);
   }
 
-  setTool(tool: "circle" | "pencil" | "rect") {
+  setTool(tool: "circle" | "line" | "rect" | "delete") {
     this.selectedTool = tool;
   }
 
@@ -104,17 +107,22 @@ export class Game {
         );
         this.ctx.stroke();
         this.ctx.closePath();
+      } else if (shape.type === "line") {
+        this.ctx.beginPath();
+        this.ctx.moveTo(shape.startX, shape.startY);
+        this.ctx.lineTo(shape.endX, shape.endY);
+        this.ctx.stroke();
       }
     });
   }
 
-  mouseDownHandler = (e) => {
+  mouseDownHandler = (e: MouseEvent) => {
     this.onClicked = true;
     this.startX = e.clientX;
     this.startY = e.clientY;
   };
 
-  mouseUpHandler = (e) => {
+  mouseUpHandler = (e: MouseEvent) => {
     this.onClicked = false;
     const width = e.clientX - this.startX;
     const height = e.clientY - this.startY;
@@ -139,6 +147,14 @@ export class Game {
         centerX: this.startX + radius,
         centerY: this.startY + radius,
       };
+    } else if (selectedTool === "line") {
+      shape = {
+        type: "line",
+        startX: this.startX,
+        startY: this.startY,
+        endX: e.clientX,
+        endY: e.clientY,
+      };
     }
 
     if (!shape) {
@@ -158,7 +174,7 @@ export class Game {
     );
   };
 
-  mouseMoveHandler = (e) => {
+  mouseMoveHandler = (e: MouseEvent) => {
     if (this.onClicked) {
       const width = e.clientX - this.startX;
       const height = e.clientY - this.startY;
@@ -176,6 +192,11 @@ export class Game {
         this.ctx.arc(centerX, centerY, Math.abs(radius), 0, Math.PI * 2);
         this.ctx.stroke();
         this.ctx.closePath();
+      } else if (selectedTool === "line") {
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.startX, this.startY);
+        this.ctx.lineTo(e.clientX, e.clientY);
+        this.ctx.stroke();
       }
     }
   };

@@ -1,10 +1,11 @@
-import { initDraw } from "@/app/draw";
 import { useEffect, useRef, useState } from "react";
 import { Icons } from "./Icons";
-import { Circle, PencilIcon, RectangleHorizontalIcon } from "lucide-react";
+import { Circle, RectangleHorizontalIcon, Slash, Undo } from "lucide-react";
 import { Game } from "@/app/draw/game";
+import axios from "axios";
+import { HTTP_BACKEND } from "@/config";
 
-export type Tool = "pencil" | "circle" | "rect";
+export type Tool = "line" | "circle" | "rect" | "delete";
 
 export function Canvas({
   roomId,
@@ -13,7 +14,7 @@ export function Canvas({
   roomId: string;
   socket: WebSocket;
 }) {
-  const [selectedTool, setSelectedTool] = useState<Tool>("pencil");
+  const [selectedTool, setSelectedTool] = useState<Tool>("line");
   const [game, setGame] = useState<Game>();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -40,7 +41,12 @@ export function Canvas({
         height={window.innerHeight}
       ></canvas>
       <div className=" fixed text-black top-5 left-[40%] border-amber-50 border-2 rounded-2xl px-20 py-3 bg-amber-50">
-        <Topbar setSelectedTool={setSelectedTool} selectedTool={selectedTool} />
+        <Topbar
+          setSelectedTool={setSelectedTool}
+          selectedTool={selectedTool}
+          roomId={roomId}
+          clearCanvas={() => game?.clearCanvas()}
+        />
       </div>
     </div>
   );
@@ -49,18 +55,22 @@ export function Canvas({
 function Topbar({
   selectedTool,
   setSelectedTool,
+  roomId,
+  clearCanvas,
 }: {
   selectedTool: Tool;
   setSelectedTool: (s: Tool) => void;
+  roomId: string;
+  clearCanvas: () => void;
 }) {
   return (
     <div className="flex gap-4 cursor-pointer">
       <Icons
-        activated={selectedTool === "pencil"}
+        activated={selectedTool === "line"}
         onclick={() => {
-          setSelectedTool("pencil");
+          setSelectedTool("line");
         }}
-        icon={<PencilIcon />}
+        icon={<Slash />}
       ></Icons>
       <Icons
         activated={selectedTool === "circle"}
@@ -75,6 +85,15 @@ function Topbar({
           setSelectedTool("rect");
         }}
         icon={<RectangleHorizontalIcon />}
+      ></Icons>
+      <Icons
+        activated={selectedTool === "delete"}
+        onclick={() => {
+          setSelectedTool("delete");
+          axios.delete(`${HTTP_BACKEND}/chats/${roomId}`);
+          clearCanvas();
+        }}
+        icon={<Undo />}
       ></Icons>
     </div>
   );
